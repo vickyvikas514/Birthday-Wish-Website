@@ -217,8 +217,12 @@ function triggerPageAnimation(pageIndex) {
 }
 
 function handleAdvance(e) {
+    // Prevent advancing if the touch/click is within the letter-message-container
+    if (e.target.closest('.letter-message-container')) {
+        return; // Allow scrolling without advancing
+    }
     // Allow advance on page 6 (currentPage === 5) or any screen after intro (!isIntro)
-    if ((currentPage === 5 || !isIntro) && !e.target.closest('#surprise-btn') && !e.target.closest('.carousel-item') && !e.target.closest('.modal') && !e.target.closest('.modal-close')) {
+    if ((currentPage === 5 || !isIntro) && !e.target.closest('#surprise-btn') && !e.target.closest('.carousel-item')) {
         if (currentPage === 5) {
             particles.length = 0; // Clear particles when leaving page 6
         }
@@ -267,7 +271,7 @@ function animateBackground() {
             if (p.y < -p.size) particles.splice(i, 1);
         } else {
             p.life--;
-            if (p.life <= 0) particles.splice(i, 1);
+            if (p.life <= 0) particles.splice(i,  demands.splice(i, 1));
         }
 
         ctx.fillStyle = p.type === 'heart' || p.type === 'balloon' ? '#99004d' : '#f7c1d3';
@@ -295,7 +299,7 @@ window.addEventListener('resize', () => {
 animateBackground();
 
 // Timer counting time since birth
-var birthDate = new Date("Jan 15, 2000 00:00:00").getTime();
+var birthDate = new Date("May 3, 2003 00:00:00").getTime();
 var x = setInterval(function() {
     var now = new Date().getTime();
     var elapsed = now - birthDate;
@@ -338,44 +342,6 @@ if (surpriseBtn) {
     surpriseBtn.addEventListener('click', handleSurprise);
 }
 
-// Image modal
-const modal = document.getElementById('modal');
-const modalImg = document.getElementById('modal-img');
-const modalCaption = document.getElementById('modal-caption');
-function attachModalListeners() {
-    document.querySelectorAll('.carousel-item img').forEach(img => {
-        function handleImageClick(e) {
-            e.preventDefault();
-            modal.style.display = 'flex';
-            modalImg.src = this.src;
-            modalCaption.innerHTML = this.dataset.caption;
-        }
-        img.addEventListener('touchstart', handleImageClick);
-        img.addEventListener('click', handleImageClick);
-    });
-}
-
-const modalClose = document.querySelector('.modal-close');
-if (modalClose) {
-    function handleModalClose(e) {
-        e.preventDefault();
-        modal.style.display = 'none';
-    }
-    modalClose.addEventListener('touchstart', handleModalClose);
-    modalClose.addEventListener('click', handleModalClose);
-}
-
-modal.addEventListener('touchstart', function(e) {
-    if (e.target === modal) {
-        modal.style.display = 'none';
-    }
-});
-modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
-        modal.style.display = 'none';
-    }
-});
-
 // Carousel functionality
 let currentImageIndex = 0;
 let touchStartX = 0;
@@ -388,7 +354,6 @@ function initializeCarousel() {
     const carouselItems = document.querySelectorAll('.carousel-item');
     if (carouselItems.length > 0) {
         carouselItems[0].classList.add('active');
-        attachModalListeners();
     }
 
     const galleryScreen = document.getElementById('gallery');
@@ -517,7 +482,7 @@ document.addEventListener('touchend', function(e) {
 
 // Floating hearts on interaction
 function createHeart(e) {
-    if (!e.target.closest('#surprise-btn') && !e.target.closest('.carousel-item') && !e.target.closest('.modal') && !e.target.closest('.modal-close')) {
+    if (!e.target.closest('#surprise-btn') && !e.target.closest('.carousel-item')) {
         const heart = document.createElement('div');
         heart.className = 'heart';
         heart.innerHTML = '❤️';
