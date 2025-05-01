@@ -1,94 +1,73 @@
-// Screen navigation
-const pages = document.querySelectorAll('.page');
-const screens = document.querySelectorAll('.screen');
-let currentPage = 0;
-let currentScreen = 0;
-let isIntro = true;
+const allScreens = document.querySelectorAll('.page, .screen');
+let currentIndex = 0;
+let isTransitioning = false;
 
 // Initialize first screen
-pages[0].classList.add('active');
+allScreens[0].classList.add('active');
 setTimeout(() => {
-    const firstContent = pages[0].querySelector('.content');
+    const firstContent = allScreens[0].querySelector('.content');
     if (firstContent) firstContent.classList.add('active');
     triggerPageAnimation(0);
 }, 100);
 
 async function showNextPage() {
-    if (isIntro) {
-        const current = pages[currentPage];
-        const currentContent = current.querySelector('.content') || current.querySelector('.whatsapp-container');
-        if (currentContent) currentContent.style.opacity = '0';
+    if (isTransitioning || currentIndex >= allScreens.length - 1) return;
+    isTransitioning = true;
 
-        setTimeout(() => {
-            current.classList.remove('active');
-            currentPage++;
-            if (currentPage < pages.length) {
-                pages[currentPage].classList.add('active');
-                const nextContent = pages[currentPage].querySelector('.content') || pages[currentPage].querySelector('.whatsapp-container');
-                if (nextContent) {
-                    setTimeout(async () => {
-                        nextContent.classList.add('active');
-                        nextContent.style.opacity = '1';
-                        // Trigger WhatsApp animation for page 3
-                        if (currentPage === 2) {
-                            const whatsappMessage = document.getElementById('whatsapp-message');
-                            if (whatsappMessage) {
-                                const messageText = "Happy Birthday Nishtha";
-                                whatsappMessage.textContent = '';
-                                whatsappMessage.classList.remove('sent');
-                                await typeMessage(whatsappMessage, messageText);
-                            }
+    const current = allScreens[currentIndex];
+    const currentContent = current.querySelector('.content') || current.querySelector('.whatsapp-container') || current.querySelector('h2');
+    if (currentContent) currentContent.style.opacity = '0';
+
+    // Clean up gallery and acrostic
+    if (current.id === 'gallery') {
+        const carouselItems = current.querySelectorAll('.carousel-item');
+        carouselItems.forEach(item => {
+            item.classList.remove('active');
+            item.style.opacity = '0';
+            item.style.display = 'none';
+        });
+    }
+    if (current.id === 'acrostic') {
+        const nameItems = current.querySelectorAll('.name-item');
+        nameItems.forEach(item => item.classList.remove('active'));
+    }
+
+    setTimeout(() => {
+        current.classList.remove('active');
+        currentIndex++;
+        if (currentIndex < allScreens.length) {
+            const next = allScreens[currentIndex];
+            next.classList.add('active');
+            console.log('Showing:', next.id);
+            const nextContent = next.querySelector('.content') || next.querySelector('.whatsapp-container') || next.querySelector('h2');
+            if (nextContent) {
+                setTimeout(async () => {
+                    nextContent.classList.add('active');
+                    nextContent.style.opacity = '1';
+                    if (next.id === 'page-3') {
+                        const whatsappMessage = document.getElementById('whatsapp-message');
+                        if (whatsappMessage) {
+                            const messageText = "Happy Birthday Nishtha";
+                            whatsappMessage.textContent = '';
+                            whatsappMessage.classList.remove('sent');
+                            await typeMessage(whatsappMessage, messageText);
                         }
-                    }, 100);
-                }
-                triggerPageAnimation(currentPage);
-            } else {
-                isIntro = false;
-                screens[currentScreen].classList.add('active');
-                const galleryText = screens[currentScreen].querySelector('h2');
-                const nameItems = screens[currentScreen].querySelectorAll('.name-item');
-                if (galleryText) {
-                    setTimeout(() => { galleryText.classList.add('active'); }, 100);
-                }
-                if (nameItems.length > 0) {
-                    nameItems.forEach((item, index) => {
-                        setTimeout(() => { item.classList.add('active'); }, index * 500);
-                    });
-                }
-                // Initialize carousel for gallery screen
-                if (screens[currentScreen].id === 'gallery') {
-                    initializeCarousel();
-                }
-            }
-        }, 500);
-    } else {
-        const currentMainScreen = screens[currentScreen];
-        const currentMainText = currentMainScreen.querySelector('h2') || currentMainScreen.querySelector('p');
-        if (currentMainText) currentMainText.style.opacity = '0';
-
-        setTimeout(() => {
-            currentMainScreen.classList.remove('active');
-            currentScreen = (currentScreen + 1) % screens.length;
-            screens[currentScreen].classList.add('active');
-            const nextMainText = screens[currentScreen].querySelector('h2');
-            const nextNameItems = screens[currentScreen].querySelectorAll('.name-item');
-            if (nextMainText) {
-                setTimeout(() => { 
-                    nextMainText.classList.add('active'); 
-                    nextMainText.style.opacity = '1'; 
+                    }
+                    if (next.id === 'acrostic') {
+                        const nameItems = next.querySelectorAll('.name-item');
+                        nameItems.forEach((item, index) => {
+                            setTimeout(() => item.classList.add('active'), index * 300);
+                        });
+                    }
+                    if (next.id === 'gallery') {
+                        initializeCarousel();
+                    }
+                    triggerPageAnimation(currentIndex);
                 }, 100);
             }
-            if (nextNameItems.length > 0) {
-                nextNameItems.forEach((item, index) => {
-                    setTimeout(() => { item.classList.add('active'); }, index * 500);
-                });
-            }
-            // Initialize carousel for gallery screen
-            if (screens[currentScreen].id === 'gallery') {
-                initializeCarousel();
-            }
-        }, 500);
-    }
+        }
+        isTransitioning = false;
+    }, 300);
 }
 
 function typeMessage(element, text) {
@@ -98,86 +77,43 @@ function typeMessage(element, text) {
             if (index < text.length) {
                 element.textContent += text[index];
                 index++;
-                setTimeout(type, 100);
+                setTimeout(type, 80);
             } else {
                 element.classList.add('sent');
-                setTimeout(resolve, 1000);
+                setTimeout(resolve, 600);
             }
         }
-        setTimeout(type, 500);
+        setTimeout(type, 300);
     });
 }
 
-function triggerPageAnimation(pageIndex) {
-    if (pageIndex === 0) {
-        // Sparkles
-        for (let i = 0; i < 5; i++) {
-            createParticle('sparkle', Math.random() * canvas.width, Math.random() * canvas.height);
-        }
-    } else if (pageIndex === 1) {
-        // Confetti
-        confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { y: 0.6 },
-            colors: ['#99004d', '#f7c1d3', '#ffe6f0']
-        });
-    } else if (pageIndex === 3) {
-        // Balloons
-        for (let i = 0; i < 3; i++) {
+function triggerPageAnimation(index) {
+    if (index === 0) {
+        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
+    } else if (index === 1) {
+        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
+    } else if (index === 3) {
+        for (let i = 0; i < 1; i++) {
             createParticle('balloon', Math.random() * canvas.width, canvas.height);
         }
-    } else if (pageIndex === 4) {
-        // Sparkles and confetti
-        for (let i = 0; i < 5; i++) {
-            createParticle('sparkle', Math.random() * canvas.width, Math.random() * canvas.height);
+    } else if (index === 4) {
+        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
+    } else if (index === 5) {
+        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
+        for (let i = 0; i < 1; i++) {
+            createParticle('balloon', Math.random() * canvas.width, canvas.height);
         }
-        confetti({
-            particleCount: 30,
-            spread: 50,
-            origin: { y: 0.6 },
-            colors: ['#99004d', '#f7c1d3', '#ffe6f0']
-        });
-    } else if (pageIndex === 5) {
-        // Confetti bursts, balloons, hearts
-        setTimeout(() => {
-            confetti({
-                particleCount: 30,
-                spread: 80,
-                angle: 45,
-                origin: { x: 0, y: 0.5 },
-                colors: ['#99004d', '#f7c1d3', '#ffe6f0']
-            });
-            createParticle('balloon', Math.random() * canvas.width, canvas.height);
-            createParticle('heart', Math.random() * canvas.width, canvas.height);
-        }, 1000);
-        setTimeout(() => {
-            confetti({
-                particleCount: 30,
-                spread: 80,
-                angle: 135,
-                origin: { x: 1, y: 0.5 },
-                colors: ['#99004d', '#f7c1d3', '#ffe6f0']
-            });
-            createParticle('balloon', Math.random() * canvas.width, canvas.height);
-        }, 1500);
     }
 }
 
 function handleAdvance(e) {
-    // Prevent advancing during scrolling or swiping
+    if (isTransitioning) return;
     if (e.target.closest('.letter-message-container') || 
         e.target.closest('.carousel-item') || 
         e.target.closest('#surprise-btn')) {
         return;
     }
-    // Allow advance on page 6 or after intro
-    if ((currentPage === 5 || !isIntro)) {
-        if (currentPage === 5) {
-            particles.length = 0; // Clear particles
-        }
-        showNextPage();
-    }
+    showNextPage();
 }
 
 document.addEventListener('click', handleAdvance);
@@ -185,39 +121,37 @@ document.addEventListener('touchstart', handleAdvance);
 
 // Auto-advance intro pages
 async function autoAdvance() {
-    if (isIntro && currentPage < pages.length - 1) {
+    if (currentIndex < 5) { // Stop at page-6
         showNextPage();
-        if (currentPage < pages.length - 1) {
-            setTimeout(autoAdvance, 3000);
-        }
+        setTimeout(autoAdvance, 2000);
     }
 }
-setTimeout(autoAdvance, 3000);
+setTimeout(autoAdvance, 2000);
 
-// Canvas animations
+// Canvas animations (disabled on mobile)
 const canvas = document.getElementById('background-canvas');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const particles = [];
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
 function createParticle(type, x, y) {
-    const speed = type === 'balloon' || type === 'heart' ? Math.random() * -1.5 - 0.5 : Math.random() * 1 + 0.5;
-    const size = type === 'sparkle' ? 4 : 15;
-    particles.push({ x, y, type, size, speed, life: type === 'sparkle' ? 30 : 80 });
+    if (isMobile) return;
+    const speed = type === 'balloon' ? -0.5 : 0.5;
+    const size = type === 'sparkle' ? 2 : 10;
+    particles.push({ x, y, type, size, speed, life: type === 'sparkle' ? 15 : 50 });
 }
 
 function animateBackground() {
+    if (isMobile) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'rgba(255, 230, 240, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (isIntro && currentPage === 2 && Math.random() < 0.03) {
-        createParticle('heart', Math.random() * canvas.width, Math.random() * canvas.height);
-    }
-
     particles.forEach((p, i) => {
-        if (p.type === 'balloon' || p.type === 'heart') {
+        if (p.type === 'balloon') {
             p.y += p.speed;
             if (p.y < -p.size) particles.splice(i, 1);
         } else {
@@ -225,12 +159,12 @@ function animateBackground() {
             if (p.life <= 0) particles.splice(i, 1);
         }
 
-        ctx.fillStyle = p.type === 'heart' || p.type === 'balloon' ? '#99004d' : '#f7c1d3';
-        if (p.type === 'heart' || p.type === 'balloon') {
+        ctx.fillStyle = p.type === 'balloon' ? '#99004d' : '#f7c1d3';
+        if (p.type === 'balloon') {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
-            ctx.bezierCurveTo(p.x - 8, p.y - 8, p.x - 8, p.y + 8, p.x, p.y + 16);
-            ctx.bezierCurveTo(p.x + 8, p.y + 8, p.x + 8, p.y - 8, p.x, p.y);
+            ctx.bezierCurveTo(p.x - 5, p.y - 5, p.x - 5, p.y + 5, p.x, p.y + 10);
+            ctx.bezierCurveTo(p.x + 5, p.y + 5, p.x + 5, p.y - 5, p.x, p.y);
             ctx.fill();
         } else {
             ctx.beginPath();
@@ -242,12 +176,12 @@ function animateBackground() {
     requestAnimationFrame(animateBackground);
 }
 
+if (!isMobile) animateBackground();
+
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
-
-animateBackground();
 
 // Timer
 var birthDate = new Date("May 3, 2003 00:00:00").getTime();
@@ -281,12 +215,7 @@ if (surpriseBtn) {
         var content = document.getElementById('surprise-content');
         content.style.display = 'block';
         this.style.display = 'none';
-        confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { y: 0.6 },
-            colors: ['#99004d', '#f7c1d3', '#ffe6f0']
-        });
+        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
     }
     surpriseBtn.addEventListener('touchstart', handleSurprise);
     surpriseBtn.addEventListener('click', handleSurprise);
@@ -299,8 +228,15 @@ let touchEndX = 0;
 
 function initializeCarousel() {
     const carouselItems = document.querySelectorAll('.carousel-item');
+    carouselItems.forEach(item => {
+        item.classList.remove('active');
+        item.style.opacity = '0';
+        item.style.display = 'none';
+    });
     if (carouselItems.length > 0) {
         carouselItems[0].classList.add('active');
+        carouselItems[0].style.opacity = '1';
+        carouselItems[0].style.display = 'block';
     }
 
     const galleryScreen = document.getElementById('gallery');
@@ -320,7 +256,7 @@ function handleTouchEnd(e) {
 }
 
 function handleSwipe() {
-    const swipeThreshold = 30;
+    const swipeThreshold = 20;
     const swipeDistance = touchEndX - touchStartX;
 
     if (swipeDistance > swipeThreshold) {
@@ -334,24 +270,28 @@ function showNextImage() {
     const carouselItems = document.querySelectorAll('.carousel-item');
     if (carouselItems.length === 0) return;
 
-    const currentItem = carouselItems[currentImageIndex];
-    currentItem.classList.remove('active');
+    carouselItems[currentImageIndex].classList.remove('active');
+    carouselItems[currentImageIndex].style.opacity = '0';
+    carouselItems[currentImageIndex].style.display = 'none';
 
     currentImageIndex = (currentImageIndex + 1) % carouselItems.length;
-    const nextItem = carouselItems[currentImageIndex];
-    nextItem.classList.add('active');
+    carouselItems[currentImageIndex].classList.add('active');
+    carouselItems[currentImageIndex].style.opacity = '1';
+    carouselItems[currentImageIndex].style.display = 'block';
 }
 
 function showPreviousImage() {
     const carouselItems = document.querySelectorAll('.carousel-item');
     if (carouselItems.length === 0) return;
 
-    const currentItem = carouselItems[currentImageIndex];
-    currentItem.classList.remove('active');
+    carouselItems[currentImageIndex].classList.remove('active');
+    carouselItems[currentImageIndex].style.opacity = '0';
+    carouselItems[currentImageIndex].style.display = 'none';
 
     currentImageIndex = (currentImageIndex - 1 + carouselItems.length) % carouselItems.length;
-    const prevItem = carouselItems[currentImageIndex];
-    prevItem.classList.add('active');
+    carouselItems[currentImageIndex].classList.add('active');
+    carouselItems[currentImageIndex].style.opacity = '1';
+    carouselItems[currentImageIndex].style.display = 'block';
 }
 
 // Floating hearts
@@ -365,7 +305,7 @@ function createHeart(e) {
         heart.style.left = x + 'px';
         heart.style.top = y + 'px';
         document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 1500);
+        setTimeout(() => heart.remove(), 1000);
     }
 }
 document.addEventListener('touchstart', createHeart);
