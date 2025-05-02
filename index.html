@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Happy Birthday, Nishtha!</title>
   <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Roboto&family=Great+Vibes&display=swap" rel="stylesheet">
 </head>
 <body>
   <canvas id="background-canvas"></canvas>
@@ -101,14 +101,15 @@
   </section>
 
   <section id="gallery" class="screen" data-index="9">
-    <h2>Your Beautiful Moments</h2>
+    <h2 class="pulse">Your Beautiful Moments</h2>
     <div class="gallery-carousel">
+      <div class="swipe-indicator"></div>
       <div class="carousel-item">
         <img src="images/2.jpg" alt="Memory 2">
         <p>Stunning</p>
       </div>
       <div class="carousel-item">
-        <img src="images/3.jpg" alt="Memory 3">
+        <img src="images/3.png" alt="Memory 3">
         <p>Gorgeous</p>
       </div>
       <div class="carousel-item">
@@ -124,12 +125,12 @@
         <p>Cutie</p>
       </div>
     </div>
-    <p class="swipe-instruction">Swipe to see more memories!</p>
+    <p class="swipe-instruction"> swipe the image !</p>
     <p class="tap-instruction">Tap to Continue</p>
   </section>
 
   <section id="countdown" class="screen" data-index="10">
-    <h2>Your Time Shining on Earth</h2>
+    <h2 class="pulse">Your Time Shining on Earth</h2>
     <div id="timer">
       <span id="days"></span> days
       <span id="hours"></span> hrs
@@ -140,8 +141,8 @@
   </section>
 
   <section id="surprise" class="screen" data-index="11">
-    <h2>A Little Magic for You</h2>
-    <button id="surprise-btn">Unwrap Your Gift!</button>
+    <h2 class="pulse">A Little Magic for You</h2>
+    <button id="surprise-btn" class="glow">Unwrap Your Gift!</button>
     <div id="surprise-content" style="display: none;">
       <p class="romantic-text">Mai hu tho sahi aur bhi kuch chahiye tujhe???</p>
     </div>
@@ -149,8 +150,10 @@
   </section>
 
   <section id="quote" class="screen" data-index="12">
-    <p>Keep Shining yaara...</p>
-    <p>kya hi karegi tension leke, Duniya tho pareshaan karegi hi tu darna mat.</p>
+    <div class="quote-container">
+      <p class="quote-text">Keep Shining yaara...</p>
+      <p class="quote-text">kya hi karegi tension leke, Duniya tho pareshaan karegi hi tu darna mat.</p>
+    </div>
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>

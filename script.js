@@ -38,7 +38,6 @@ async function showNextPage() {
         if (currentIndex < allScreens.length) {
             const next = allScreens[currentIndex];
             next.classList.add('active');
-            console.log('Showing:', next.id);
             const nextContent = next.querySelector('.content') || next.querySelector('.whatsapp-container') || next.querySelector('h2');
             if (nextContent) {
                 setTimeout(async () => {
@@ -88,22 +87,7 @@ function typeMessage(element, text) {
 }
 
 function triggerPageAnimation(index) {
-    if (index === 0) {
-        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
-    } else if (index === 1) {
-        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
-    } else if (index === 3) {
-        for (let i = 0; i < 1; i++) {
-            createParticle('balloon', Math.random() * canvas.width, canvas.height);
-        }
-    } else if (index === 4) {
-        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
-    } else if (index === 5) {
-        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
-        for (let i = 0; i < 1; i++) {
-            createParticle('balloon', Math.random() * canvas.width, canvas.height);
-        }
-    }
+    confetti({ particleCount: 8, spread: 20, colors: ['#99004d', '#f7c1d3'], scalar: 0.8 });
 }
 
 function handleAdvance(e) {
@@ -123,65 +107,10 @@ document.addEventListener('touchstart', handleAdvance);
 async function autoAdvance() {
     if (currentIndex < 5) { // Stop at page-6
         showNextPage();
-        setTimeout(autoAdvance, 2000);
+        setTimeout(autoAdvance, 2500);
     }
 }
-setTimeout(autoAdvance, 2000);
-
-// Canvas animations (disabled on mobile)
-const canvas = document.getElementById('background-canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const particles = [];
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-function createParticle(type, x, y) {
-    if (isMobile) return;
-    const speed = type === 'balloon' ? -0.5 : 0.5;
-    const size = type === 'sparkle' ? 2 : 10;
-    particles.push({ x, y, type, size, speed, life: type === 'sparkle' ? 15 : 50 });
-}
-
-function animateBackground() {
-    if (isMobile) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'rgba(255, 230, 240, 0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach((p, i) => {
-        if (p.type === 'balloon') {
-            p.y += p.speed;
-            if (p.y < -p.size) particles.splice(i, 1);
-        } else {
-            p.life--;
-            if (p.life <= 0) particles.splice(i, 1);
-        }
-
-        ctx.fillStyle = p.type === 'balloon' ? '#99004d' : '#f7c1d3';
-        if (p.type === 'balloon') {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.bezierCurveTo(p.x - 5, p.y - 5, p.x - 5, p.y + 5, p.x, p.y + 10);
-            ctx.bezierCurveTo(p.x + 5, p.y + 5, p.x + 5, p.y - 5, p.x, p.y);
-            ctx.fill();
-        } else {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    });
-
-    requestAnimationFrame(animateBackground);
-}
-
-if (!isMobile) animateBackground();
-
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+setTimeout(autoAdvance, 2500);
 
 // Timer
 var birthDate = new Date("May 3, 2003 00:00:00").getTime();
@@ -215,7 +144,7 @@ if (surpriseBtn) {
         var content = document.getElementById('surprise-content');
         content.style.display = 'block';
         this.style.display = 'none';
-        confetti({ particleCount: 10, spread: 30, colors: ['#99004d', '#f7c1d3'] });
+        confetti({ particleCount: 8, spread: 20, colors: ['#99004d', '#f7c1d3'], scalar: 0.8 });
     }
     surpriseBtn.addEventListener('touchstart', handleSurprise);
     surpriseBtn.addEventListener('click', handleSurprise);
@@ -243,6 +172,7 @@ function initializeCarousel() {
     if (galleryScreen) {
         galleryScreen.addEventListener('touchstart', handleTouchStart);
         galleryScreen.addEventListener('touchend', handleTouchEnd);
+        galleryScreen.addEventListener('click', handleCarouselClick);
     }
 }
 
@@ -256,13 +186,26 @@ function handleTouchEnd(e) {
 }
 
 function handleSwipe() {
-    const swipeThreshold = 20;
+    const swipeThreshold = 30;
     const swipeDistance = touchEndX - touchStartX;
 
     if (swipeDistance > swipeThreshold) {
         showPreviousImage();
     } else if (swipeDistance < -swipeThreshold) {
         showNextImage();
+    }
+}
+
+function handleCarouselClick(e) {
+    const carousel = document.querySelector('.gallery-carousel');
+    const rect = carousel.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const carouselWidth = rect.width;
+
+    if (clickX > carouselWidth / 2) {
+        showNextImage();
+    } else {
+        showPreviousImage();
     }
 }
 
